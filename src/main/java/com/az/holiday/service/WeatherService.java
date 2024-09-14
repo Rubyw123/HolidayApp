@@ -28,7 +28,10 @@ public class WeatherService {
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public void saveResultToJson(List<WeatherInfo> weathers,String filePath) throws IOException {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
         //create json string
         String json = gson.toJson(weathers);
 
