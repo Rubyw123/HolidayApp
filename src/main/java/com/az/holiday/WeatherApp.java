@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Component
@@ -28,7 +26,7 @@ public class WeatherApp {
         this.weatherService = weatherService;
     }
 
-    private static List<String> parseInput(String input){
+    private List<String> parseInput(String input){
         List<String> zips = new ArrayList<>();
         String[] splitted = input.split(",");
         for (String s : splitted) {
@@ -40,27 +38,50 @@ public class WeatherApp {
         return zips;
     }
 
+    public static List<Holiday> removeDuplicates(List<Holiday> holidays) {
+        Set<String> dates = new HashSet<>();
+        List<Holiday> result = new ArrayList<>();
+
+        for (Holiday holiday : holidays) {
+            if (dates.add(holiday.getDate().toString())) {  // add returns false if the date is already in the set
+                result.add(holiday);      // only add holidays with unique dates
+            }
+        }
+
+        return result;
+    }
+
+
     public void run() throws Exception {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Please input zipcodes: ");
-        String input = scanner.nextLine();
+        String input;
+        while(true){
+            System.out.println("Please input zipcodes (type 'q' to quit): ");
+            input = scanner.nextLine().trim();
 
-        List<String> zips = parseInput(input);
+            if(input.equals("q")){
+                break;
+            }
+                List<String> zips = parseInput(input);
+                if(!zips.isEmpty()){
+                    try{
+                        List<Place> places = zipService.getPlaces(zips);
+                        List<Holiday> holidays = holidayService.getHolidays("2024");
 
-        ZipService zipService = new ZipService();
-        HolidayService  holidayService = new HolidayService();
-        WeatherService weatherService = new WeatherService();
+                        if(!holidays.isEmpty() && !places.isEmpty()){
+                            List<WeatherInfo> weatherInfos = weatherService.getWeatherInfos(places,removeDuplicates(holidays),2024);
+                            weatherService.saveResultToJson(weatherInfos,"./holiday.json");
+                        }
+                    } catch (IOException | InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
 
-        try{
-            List<Place> places = zipService.getPlaces(zips);
-            List<Holiday> holidays = holidayService.getHolidays("2024");
 
-            List<WeatherInfo> weatherInfos = weatherService.getWeatherInfos(places,holidays,2024);
-            weatherService.saveResultToJson(weatherInfos,"./holiday.json");
 
-        } catch (IOException | InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
         }
+
+
     }
 
 

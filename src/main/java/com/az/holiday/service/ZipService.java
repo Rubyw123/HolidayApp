@@ -45,20 +45,24 @@ public class ZipService {
         if (response.statusCode() == 200) {
             //Parser json
             //getting the first place of the array
-            var placeJson = new Gson().fromJson(response.body(), JsonObject.class).get("places").getAsJsonArray().get(0).getAsJsonObject();
+            var zip = new Gson().fromJson(response.body(), JsonObject.class);
+            if(zip.get("places") != null && !zip.get("places").isJsonNull()){
+                var place = zip.get("places").getAsJsonArray().get(0).getAsJsonObject();
+                String placeName = place.get("place name").getAsString();
+                double longitude = place.get("longitude").getAsDouble();
+                double latitude = place.get("latitude").getAsDouble();
 
-            String placeName = placeJson.get("place name").getAsString();
-            double longitude = placeJson.get("longitude").getAsDouble();
-            double latitude = placeJson.get("latitude").getAsDouble();
-
-            return Place.builder()
-                    .name(placeName)
-                    .zipcode(zipcode)
-                    .longitude(longitude)
-                    .latitude(latitude)
-                    .build();
+                return Place.builder()
+                        .name(placeName)
+                        .zipcode(zipcode)
+                        .longitude(longitude)
+                        .latitude(latitude)
+                        .build();
+            }else{
+                return null;
+            }
         }else{
-            System.out.println("Zip Error: " + response.statusCode());
+            System.out.println("Zipcode Error: " + response.statusCode());
             return null;
         }
     }
