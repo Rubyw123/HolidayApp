@@ -80,7 +80,7 @@ public class WeatherService {
         return weatherInfos;
     }
 
-    public CompletableFuture<double[]> getPlaceWeatherAsync(Place place, Holiday holiday, int currentYear) throws IOException, InterruptedException, ExecutionException {
+    public CompletableFuture<double[]> getPlaceWeatherAsync(Place place, Holiday holiday, int currentYear) {
         //init completableFuture task list
         List<CompletableFuture<double[]>> futures = new ArrayList<>();
 
@@ -107,7 +107,7 @@ public class WeatherService {
                 });
     }
 
-    private CompletableFuture<double[]> getWeatherOfYearAsync(Place place, Holiday holiday, int year) throws IOException, InterruptedException {
+    private CompletableFuture<double[]> getWeatherOfYearAsync(Place place, Holiday holiday, int year){
         //setting retrieve url for that year
         String url = WEATHER_URL + "?latitude=" + place.getLatitude()
                 + "&longitude=" + place.getLongitude()
